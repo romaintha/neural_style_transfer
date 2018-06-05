@@ -106,17 +106,23 @@ python neural_style_transfer/transfer.py images/mountain.jpg images/monet.jpg  -
 ### Examples
 * Using the default options:
 
-Content: <img src="https://raw.githubusercontent.com/romaintha/neural_style_transfer/master/images/mountain.jpg" width="160" height="106">
+Content: 
 
-Style: <img src="https://raw.githubusercontent.com/romaintha/neural_style_transfer/master/images/monet.jpg" width="160" height="106">
+<img src="https://raw.githubusercontent.com/romaintha/neural_style_transfer/master/images/mountain.jpg" width="320" height="213">
 
-Combination: <img src="https://raw.githubusercontent.com/romaintha/neural_style_transfer/master/images/combination_image.jpg" width="125" height="100">
+Style:
+ 
+ <img src="https://raw.githubusercontent.com/romaintha/neural_style_transfer/master/images/monet.jpg" width="320" height="213">
+
+Combination:
+ 
+ <img src="https://raw.githubusercontent.com/romaintha/neural_style_transfer/master/images/combination_image.jpg" width="375" height="300">
+
 
 * Preserving the colors:
 
-Content: ![content_image](images/mountain.jpg =160x106) 
-Style: ![style_image](images/monet.jpg =160x106)
-Combination: ![combination_image](images/combination_image_colors_preserved.jpg =125x100) 
+<img src="https://raw.githubusercontent.com/romaintha/neural_style_transfer/master/images/combination_image_colors_preserved.jpg" width="375" height="300">
+
 
 ## References
 *  [1]["A Neural Algorithm of Artistic Style"](https://arxiv.org/abs/1508.06576) Gatys et al
