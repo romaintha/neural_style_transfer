@@ -106,9 +106,11 @@ python neural_style_transfer/transfer.py images/mountain.jpg images/monet.jpg  -
 ### Examples
 * Using the default options:
 
-Content: ![content_image](images/mountain.jpg =160x106) 
-Style: ![style_image](images/monet.jpg =160x106)
-Combination: ![combination_image](images/combination_image.jpg =125x100) 
+Content: <img src="https://raw.githubusercontent.com/romaintha/neural_style_transfer/master/images/mountain.jpg" width="160" height="106">
+
+Style: <img src="https://raw.githubusercontent.com/romaintha/neural_style_transfer/master/images/monet.jpg" width="160" height="106">
+
+Combination: <img src="https://raw.githubusercontent.com/romaintha/neural_style_transfer/master/images/combination_image.jpg" width="125" height="100">
 
 * Preserving the colors:
 
