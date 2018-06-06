@@ -5,6 +5,95 @@ from torch.utils import model_zoo
 from torchvision.models import vgg
 
 
+class TransformNetwork(nn.Module):
+
+    def __init__(self):
+        super(TransformNetwork, self).__init__()
+        # initial layers
+        self.conv_1 = ConvPadded(3, 32, kernel_size=9, stride=1)
+        self.instance_norm_1 = nn.InstanceNorm2d(32, affine=True)
+        self.conv_2 = ConvPadded(32, 64, kernel_size=3, stride=2)
+        self.instance_norm_2 = nn.InstanceNorm2d(64, affine=True)
+        self.conv_3 = ConvPadded(64, 128, kernel_size=3, stride=2)
+        self.instance_norm_3 = nn.InstanceNorm2d(128, affine=True)
+        # residual layers
+        self.residual_1 = Residual(128)
+        self.residual_2 = Residual(128)
+        self.residual_3 = Residual(128)
+        self.residual_4 = Residual(128)
+        self.residual_5 = Residual(128)
+        # upsampling layers
+        self.deconv_1 = UpsampleConv(128, 64, kernel_size=3, stride=1, upsample=2)
+        self.instance_norm_4 = torch.nn.InstanceNorm2d(64, affine=True)
+        self.deconv_2 = UpsampleConv(64, 32, kernel_size=3, stride=1, upsample=2)
+        self.instance_norm_5 = torch.nn.InstanceNorm2d(32, affine=True)
+        self.deconv_3 = ConvPadded(32, 3, kernel_size=9, stride=1)
+
+        # non linear layer
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        out = self.relu(self.instance_norm_1(self.conv_1(x)))
+        out = self.relu(self.instance_norm_2(self.conv_2(out)))
+        out = self.relu(self.instance_norm_3(self.conv_3(out)))
+
+        out = self.residual_1(out)
+        out = self.residual_2(out)
+        out = self.residual_3(out)
+        out = self.residual_4(out)
+        out = self.residual_5(out)
+
+        out = self.relu(self.instance_norm_4(self.deconv_1(out)))
+        out = self.relu(self.instance_norm_5(self.deconv_2(out)))
+        out = self.deconv_3(out)
+
+        return out
+
+
+class ConvPadded(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, stride):
+        super(ConvPadded, self).__init__()
+        reflection_padding = kernel_size // 2
+        self.reflection_pad = nn.ReflectionPad2d(reflection_padding)
+        self.conv2d = nn.Conv2d(in_channels, out_channels, kernel_size, stride)
+
+    def forward(self, x):
+        out = self.reflection_pad(x)
+        out = self.conv2d(out)
+        return out
+
+
+class Residual(nn.Module):
+
+    def __init__(self, channels):
+        super(Residual, self).__init__()
+        self.conv_1 = ConvPadded(channels, channels, kernel_size=3, stride=1)
+        self.instance_norm_1 = nn.InstanceNorm2d(channels, affine=True)
+        self.conv_2 = ConvPadded(channels, channels, kernel_size=3, stride=1)
+        self.instance_norm_2 = nn.InstanceNorm2d(channels, affine=True)
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        out = self.relu(self.instance_norm_1(self.conv_1(x)))
+        out = self.instance_norm_2(self.conv_2(out))
+        return out + x
+
+
+class UpsampleConv(nn.Module):
+
+    def __init__(self, in_channels, out_channels, kernel_size, stride, upsample):
+        super(UpsampleConv, self).__init__()
+        self.upsample_layer = nn.Upsample(mode='nearest', scale_factor=upsample)
+        reflection_padding = kernel_size // 2
+        self.reflection_pad = nn.ReflectionPad2d(reflection_padding)
+        self.conv2d = nn.Conv2d(in_channels, out_channels, kernel_size, stride)
+
+    def forward(self, x):
+        out = self.upsample_layer(x)
+        out = self.reflection_pad(out)
+        return self.conv2d(out)
+
+
 class Normalization(nn.Module):
     def __init__(self, mean, std):
         super(Normalization, self).__init__()

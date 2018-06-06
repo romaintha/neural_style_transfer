@@ -5,26 +5,25 @@ import torch.nn.functional as F
 
 class ContentLoss(nn.Module):
 
-    def __init__(self, target, weight):
+    def __init__(self, weight):
         super(ContentLoss, self).__init__()
-        self.target = target.detach()
         self.weight = weight
 
-    def forward(self, input):
-        return self.weight * F.mse_loss(input, self.target)
+    def forward(self, input, target):
+        return self.weight * F.mse_loss(input, target)
 
 
 class StyleLoss(nn.Module):
 
-    def __init__(self, target_feature, weight, shifting_activation_value=0):
+    def __init__(self, weight, shifting_activation_value=0):
         super(StyleLoss, self).__init__()
         self.shifting_activation_value = shifting_activation_value
-        self.target = self.gram_matrix(target_feature).detach()
         self.weight = weight
 
-    def forward(self, input):
-        G = self.gram_matrix(input)
-        return self.weight * F.mse_loss(G, self.target)
+    def forward(self, input, target):
+        G_input = self.gram_matrix(input)
+        G_target = self.gram_matrix(target).detach()
+        return self.weight * F.mse_loss(G_input, G_target)
 
     def gram_matrix(self, input):
         a, b, c, d = input.size()

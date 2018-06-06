@@ -1,9 +1,15 @@
 from PIL import Image
+
 import numpy as np
+
 import matplotlib.pyplot as plt
 
 import torch
 import torchvision.transforms as transforms
+
+from torch.utils.data import DataLoader
+
+from torchvision import datasets
 
 
 class ImageHandler:
@@ -73,3 +79,30 @@ class MatchColorHistogram(object):
         color_transferred_image *= 255.
         color_transferred_image = np.clip(color_transferred_image, 0, 255)
         return Image.fromarray(color_transferred_image.astype('uint8'))
+
+
+class TrainStyleImageHandler:
+
+    def __init__(self, image_size, style_image_path, dataset_path, batch_size, device,):
+        self.image_size = image_size
+        self.device = device
+
+        train_dataset = datasets.ImageFolder(dataset_path, self.loader)
+        self.train_loader = DataLoader(train_dataset, batch_size=batch_size)
+
+        self.style_image = self.style_image_loader(style_image_path, batch_size)
+
+    @property
+    def loader(self):
+        return transforms.Compose([
+            transforms.Resize(self.image_size),
+            transforms.CenterCrop(self.image_size),
+            transforms.ToTensor(),
+        ])
+
+    def style_image_loader(self, style_image_path, batch_size):
+        style_image = Image.open(style_image_path)
+        style_image = self.loader(style_image)
+        style_image = style_image.repeat(batch_size, 1, 1, 1)
+        return style_image.to(self.device, torch.float)
+
